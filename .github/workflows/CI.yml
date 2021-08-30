@@ -64,7 +64,6 @@ jobs:
         echo SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }} >> .env
         echo EMAIL_FROM=${{ secrets.EMAIL_FROM }} >> .env
         cat .env
-      working-directory: 13app/backend/
       
     - name: Run tests
       run: yarn test
