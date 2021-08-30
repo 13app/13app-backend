@@ -1,0 +1,70 @@
+# This workflow will do a clean install of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: Node.js CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  Linting:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js 16.x
+      uses: actions/setup-node@v2
+      with:
+        node-version: 16.x
+
+    - name: Install Yarn
+      run: npm install -g yarn
+      
+    - name: Install dependencies
+      run: yarn install
+      
+    - name: Lint
+      run: yarn lint
+      
+  Test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js 16.x
+      uses: actions/setup-node@v2
+      with:
+        node-version: 16.x
+
+    - name: Install Yarn
+      run: npm install -g yarn
+      
+    - name: Install dependencies
+      run: yarn install
+      
+    - name: Create env file
+      run: |
+        touch .env
+        echo PORT=${{ secrets.PORT }} >> .env
+        
+        echo MONGODB_URL=${{ secrets.MONGODB_URL }} >> .env
+        echo JWT_SECRET=${{ secrets.JWT_SECRET }} >> .env
+        echo JWT_ACCESS_EXPIRATION_MINUTES=${{ secrets.JWT_ACCESS_EXPIRATION_MINUTES }} >> .env
+        echo JWT_RESET_PASSWORD_EXPIRATION_MINUTES=${{ secrets.JWT_RESET_PASSWORD_EXPIRATION_MINUTES }} >> .env
+        echo JWT_VERIFY_EMAIL_EXPIRATION_MINUTES=${{ secrets.JWT_VERIFY_EMAIL_EXPIRATION_MINUTES }} >> .env
+        
+        echo SMTP_HOST=${{ secrets.SMTP_HOST }} >> .env
+        echo SMTP_PORT=${{ secrets.SMTP_PORT }} >> .env
+        echo SMTP_USERNAME=${{ secrets.SMTP_USERNAME }} >> .env
+        echo SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }} >> .env
+        echo EMAIL_FROM=${{ secrets.EMAIL_FROM }} >> .env
+        cat .env
+      working-directory: 13app/backend/
+      
+    - name: Run tests
+      run: yarn test
