@@ -40,6 +40,12 @@ jobs:
       uses: actions/setup-node@v2
       with:
         node-version: 16.x
+    
+    - name: Start MongoDB
+      uses: supercharge/mongodb-github-action@1.6.0
+      with:
+        mongodb-version: 4.4
+
 
     - name: Install Yarn
       run: npm install -g yarn
