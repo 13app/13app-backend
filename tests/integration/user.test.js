@@ -5,7 +5,7 @@ const app = require('../../src/app');
 const setupTestDB = require('../utils/setupTestDB');
 const { User } = require('../../src/models');
 const { userOne, userTwo, admin, insertUsers } = require('../fixtures/user.fixture');
-const { userOneAccessToken, adminAccessToken } = require('../fixtures/token.fixture');
+const { userOneAccessToken, userTwoAccessToken, adminAccessToken } = require('../fixtures/token.fixture');
 
 setupTestDB();
 
@@ -620,6 +620,46 @@ describe('User routes', () => {
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(updateBody)
         .expect(httpStatus.BAD_REQUEST);
+    });
+  });
+
+  describe('Get /v1/users/me', () => {
+    test('should return 200 and the logged-in user object if data is ok', async () => {
+      await insertUsers([userOne, userTwo]);
+
+      const res1 = await request(app)
+        .get(`/v1/users/me`)
+        .set('Authorization', `Bearer ${userOneAccessToken}`)
+        .send()
+        .expect(httpStatus.OK);
+
+      expect(res1.body).not.toHaveProperty('password');
+      expect(res1.body).toEqual({
+        id: userOne._id.toHexString(),
+        email: userOne.email,
+        name: userOne.name,
+        role: userOne.role,
+        isEmailVerified: userOne.isEmailVerified,
+      });
+
+      const res2 = await request(app)
+        .get(`/v1/users/me`)
+        .set('Authorization', `Bearer ${userTwoAccessToken}`)
+        .send()
+        .expect(httpStatus.OK);
+
+      expect(res2.body).not.toHaveProperty('password');
+      expect(res2.body).toEqual({
+        id: userTwo._id.toHexString(),
+        email: userTwo.email,
+        name: userTwo.name,
+        role: userTwo.role,
+        isEmailVerified: userTwo.isEmailVerified,
+      });
+    });
+
+    test('should return 401 error if access token is missing', async () => {
+      await request(app).get('/v1/users/me').expect(httpStatus.UNAUTHORIZED);
     });
   });
 });
