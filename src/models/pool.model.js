@@ -1,14 +1,17 @@
 const mongoose = require('mongoose');
+const { modes } = require('../config/modes');
 const { toJSON, paginate } = require('./plugins');
 
 const poolSchema = mongoose.Schema({
-  name: {
-    mode1: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-      },
-    ],
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
+  mode: {
+    type: String,
+    enum: modes,
+    required: true,
   },
 });
 
@@ -19,6 +22,6 @@ poolSchema.plugin(paginate);
 /**
  * @typedef Pool
  */
-const Pool = mongoose.model('User', poolSchema);
+const Pool = mongoose.model('Pool', poolSchema);
 
 module.exports = Pool;
